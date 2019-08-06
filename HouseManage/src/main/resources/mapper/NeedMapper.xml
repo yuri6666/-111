@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.winit.mapper.NeedMapper">
+	<parameterMap id="Need" type="com.winit.entity.pojo.Need"></parameterMap>
+
+	<resultMap id="NeedResult" type="com.winit.entity.pojo.Need">
+		<id property="id" column="id"/>
+		<result property="name" column="name"/>	
+		<result property="classId" column="class_id"/>	
+		<result property="className" column="class_name"/>	
+		<result property="levelId" column="level_id"/>	
+		<result property="levelName" column="level_name"/>	
+		<result property="provinceCode" column="province_code"/>
+		<result property="province" column="province"/>	
+		<result property="cityCode" column="city_code"/>	
+		<result property="city" column="city"/>
+		<result property="countyCode" column="county_code"/>	
+		<result property="county" column="county"/>
+		<result property="status" column="status"/>	
+		<result property="customerId" column="customer_id"/>
+		<result property="customerName" column="customer_name"/>
+		<result property="nurseId" column="nurse_id"/>
+		<result property="nurseName" column="nurse_name"/>
+		<result property="isEnable" column="is_enable"/>	
+		<result property="comment" column="comment"/>	
+		<result property="money" column="money"/>		
+		<result property="priceId" column="price_id"/>	
+		<result property="price" column="price"/>	
+		<result property="ability" column="ability"/>	
+		<result property="abilityId" column="ability_id"/>	
+		<result property="experienceId" column="experience_id"/>	
+		<result property="experience" column="experience"/>	
+		<result property="ageId" column="age_id"/>	
+		<result property="age" column="age"/>	
+		<result property="education" column="education"/>	
+		<result property="educationId" column="education_id"/>
+		<result property="money" column="money"/>
+	</resultMap>
+	
+	<select id="needList" resultMap="NeedResult">
+		select 	n.* from
+(SELECT
+	a.*, b. NAME AS class_name,
+	c. NAME AS level_name,
+	d. NAME AS province,
+	e. NAME AS city,
+	f. NAME AS county,
+	g.realname AS nurse_name,
+	h.realname AS customer_name,
+  d1.name as age,
+  d2.name as ability,
+  d3.name as experience,
+  d4.name as education,
+  d5.name as price
+FROM
+	needs a
+LEFT JOIN classes b ON a.class_id = b.id
+LEFT JOIN levels c ON a.level_id = c.id
+LEFT JOIN province d ON a.province_code = d.province_code
+LEFT JOIN city e ON a.city_code = e.city_code
+LEFT JOIN area f ON a.county_code = f.area_code
+LEFT JOIN users g ON a.nurse_id = g.id
+LEFT JOIN users h ON a.customer_id = h.id
+left join dictionary d1 on a.age_id=d1.id
+left join dictionary d2 on a.ability_id=d2.id
+left join dictionary d3 on a.experience_id=d3.id
+left join dictionary d4 on a.education_id=d4.id
+left join dictionary d5 on a.price_id=d5.id     
+<where>
+<if test="idStr!=null ">
+		      a.id not in (#{idStr})
+		    </if>
+		    </where>
+ ) n 
+   
+		<where>	
+			<if test="id != null ">
+			      n.id=#{id}
+			</if>			
+		     <if test="customerId!=null ">
+		    and n.customer_id=#{customerId}
+		    </if>
+		    <if test="ageId!=null ">
+		    and (n.age_id=#{ageId} or n.age="不限")
+		    </if>
+		    <if test="educationId!=null ">
+		    and (n.education_id=#{educationId} or n.education="不限")
+		    </if>
+		       <if test="experienceId!=null ">
+		    and (n.experience_id=#{experienceId} or n.experience="不限")
+		    </if>
+		    <if test="abilityId!=null ">
+		    and (n.ability_id=#{abilityId} or n.ability="不限")
+		    </if>
+		    <if test="classId!=null ">
+		    and (n.class_id=#{classId} or n.class_name="不限")
+		    </if>
+		     <if test="levelId!=null ">
+		    and (n.level_id=#{levelId} or n.level_name="不限")
+		    </if>
+		      <if test="provinceCode!=null ">
+		    and n.province_code=#{provinceCode}
+		    </if>
+		      <if test="cityCode!=null ">
+		    and n.city_code=#{cityCode}
+		    </if>
+		     <if test="countyCode!=null ">
+		    and n.county_code=#{countyCode}
+		    </if>
+		    <if test="status!=null ">
+		    and n.status=#{status}
+		    </if>
+         <if test="isEnable!=null ">
+		     and n.is_enable=#{isEnable}
+		    </if>
+		   
+		     <if test="nurseId!=null ">
+		    and 1=1 or n.nurse_id=#{nurseId} 
+		    </if>
+		  
+		</where>
+	</select>
+
+	<select id="getAll" resultMap="NeedResult">
+		select 	n.* from needs n
+ <where>
+  <if test="nurseId!=null">
+		nurse_id = #{nurseId}
+		</if>
+		<if test="status!=null">
+		and status = #{status}
+		</if>
+ </where>
+	</select>
+	<delete id="deletebyId">
+		delete from needs  where id = #{id}
+	</delete>
+	<update id="updateSelective">
+		update needs a 
+		<set>
+		<if test="status!=null">
+		status = #{status},
+		</if>
+		<if test="isEnable!=null">
+		is_enable = #{isEnable},
+		</if>
+	<if test="nurseId!=null">
+		nurse_id = #{nurseId},
+		</if>
+	<if test="money!=null">
+		money = #{money},
+		</if>
+		<if test='comment!=null and comment!=""'>
+		comment = #{comment}
+		</if>
+		</set>
+	  where a.id=#{id}
+	</update>
+	<update id="updateServer">
+		update needs a set status=#{status},nurse_id=#{nurseId}
+		
+	  where a.id=#{id}
+	</update>
+</mapper>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.winit.mapper.MessageMapper">
+	<parameterMap id="message" type="com.winit.entity.pojo.Message"></parameterMap>
+
+	<resultMap id="messageResult" type="com.winit.entity.pojo.Message">
+		<id property="id" column="id"/>
+		<result property="title" column="title"/>
+		<result property="isEnable" column="is_enable"/>
+		<result property="createTime" column="create_time"/>
+		<result property="releaseTime" column="release_time"/>
+	     <result property="content" column="content"/>
+	</resultMap>
+	
+	<select id="messageList" resultMap="messageResult">
+		select * from messages 	
+		<where>
+		<if test="id!=null">
+		id = #{id}
+		</if>
+		</where>
+		order by create_time desc
+	</select>
+
+	<delete id="deletebyId">
+		delete from messages  where id = #{id}
+	</delete>
+	<update id="updateSelective">
+		update messages a 
+		<set>
+		<if test="isEnable!=null">
+		is_enable = #{isEnable},
+		</if>
+		<if test="releaseTime!=null">
+		release_time = #{releaseTime}
+		</if>
+		</set>
+	  where a.id=#{id}
+	</update>
+</mapper>

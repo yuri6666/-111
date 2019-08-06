@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.winit.mapper.NeedNurseMapper">
+	<parameterMap id="NeedNurse" type="com.winit.entity.pojo.NeedNurse"></parameterMap>
+
+	<resultMap id="NeedNurseResult" type="com.winit.entity.pojo.NeedNurse">
+		<id property="id" column="id"/>
+		<result property="nurseId" column="nurse_id"/>	
+		<result property="needId" column="need_id"/>	
+		<result property="createTime" column="create_time"/>	
+	</resultMap>
+	
+
+
+	<select id="getAll" resultMap="NeedNurseResult" >
+		select  a.* from neednurse a
+		<where>
+			<if test="nurseId != null ">
+			      a.nurse_id=#{nurseId}
+			</if>			
+			 
+		</where>
+	</select>
+
+</mapper>

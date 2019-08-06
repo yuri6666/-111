@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.winit.mapper.AreaMapper">
+
+
+	<resultMap id="countyResult" type="com.winit.entity.pojo.County">
+	<result property="id" column="id"/>	
+		<result property="name" column="name"/>	
+		<result property="cityCode" column="city_code"/>	
+		<result property="areaCode" column="area_code"/>	
+	</resultMap>
+	<resultMap id="provinceResult" type="com.winit.entity.pojo.Province">
+	<result property="id" column="id"/>	
+		<result property="name" column="name"/>	
+		<result property="provinceCode" column="province_code"/>	
+
+	</resultMap>
+	<resultMap id="cityResult" type="com.winit.entity.pojo.City">
+	<result property="id" column="id"/>	
+		<result property="name" column="name"/>	
+		<result property="cityCode" column="city_code"/>	
+		<result property="provinceCode" column="province_code"/>	
+	</resultMap>
+
+
+	<select id="getProvince" resultMap="provinceResult" >
+		select  * from province a
+		
+	</select>
+	<select id="getCity" resultMap="cityResult" parameterType="com.winit.entity.pojo.City">
+		select  * from city a where province_code=#{provinceCode}
+	</select>
+	<select id="getCounty" resultMap="countyResult" parameterType="com.winit.entity.pojo.County">
+		select  * from area  a where city_code=#{cityCode}
+
+	</select>
+</mapper>

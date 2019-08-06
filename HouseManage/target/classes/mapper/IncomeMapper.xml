@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.winit.mapper.IncomeMapper">
+	<parameterMap id="Income" type="com.winit.entity.pojo.Income"></parameterMap>
+
+	<resultMap id="IncomeResult" type="com.winit.entity.pojo.Income">
+		<id property="id" column="id"/>
+		<result property="customerId" column="customer_id"/>	
+		<result property="nurseId" column="nurse_id"/>
+		<result property="money" column="money"/>
+		<result property="nurseName" column="nurse_name"/>
+		<result property="customerName" column="customer_name"/>
+		<result property="createTime" column="create_time"/>	
+		<result property="time" column="time"/>
+	</resultMap>
+	
+	<select id="incomeList" resultMap="IncomeResult">
+		select a.* from income a
+		<where>
+			<if test="id != null ">
+			      a.id=#{id}
+			</if>			
+            <if test='customerName!=null and customerName!=""'>
+			  and	a.customer_name LIKE CONCAT('%', #{customerName}, '%')
+			</if>
+			 <if test="nurseId != null ">
+			   and a.nurse_id=#{nurseId}
+			</if>
+			 <if test='nurseName!=null and nurseName!=""'>
+			  and	a.nurse_name LIKE CONCAT('%', #{nurseName}, '%')
+			</if>	
+		</where>
+	</select>
+   
+	<select id="getAll" resultMap="IncomeResult">
+	 select a.* from income a
+		<where>
+			<if test="id != null ">
+			      a.id=#{id}
+			</if>
+			 <if test="nurseId != null ">
+			   and a.nurse_id=#{nurseId}
+			</if>	
+			 <if test='customerName!=null and customerName!=""'>
+			  and	a.customer_name LIKE CONCAT('%', #{customerName}, '%')
+			</if>
+			 <if test='nurseName!=null and nurseName!=""'>
+			  and	a.nurse_name LIKE CONCAT('%', #{nurseName}, '%')
+			</if>	
+		</where>
+	</select>
+	<select id="grounpByYear" resultMap="IncomeResult">
+	 select year(create_time) as time,sum(money)as money from income a 
+     <where>
+     <if test="nurseId!=null">
+        a.nurse_id=#{nurseId}
+			</if>	
+     </where>
+     group by year(create_time)
+	</select>
+	<select id="grounpByMonth" resultMap="IncomeResult">
+	select concat(y,'-',m)time,money as money from(select year(create_time) y,month(create_time) m,sum(money) money from income 
+     <where>
+     <if test="nurseId!=null">
+        a.nurse_id=#{nurseId}
+			</if>	
+     </where>
+   group by year(create_time),month(create_time))a
+	</select>
+	<select id="grounpByDay" resultMap="IncomeResult">
+	SELECT
+	concat_ws('-', y, m, d) time,
+	money AS money
+FROM
+	(
+		SELECT
+			YEAR (create_time) y,
+			MONTH (create_time) m,
+			DAY (create_time) d,
+			sum(money) money
+		FROM
+			income 
+			<where>
+     <if test="nurseId!=null">
+        a.nurse_id=#{nurseId}
+			</if>	
+     </where>
+		GROUP BY
+			YEAR (create_time),
+			MONTH (create_time),
+			DAY (create_time)
+	) a
+     
+	</select>
+	<select id="grounpByquarter" resultMap="IncomeResult">
+SELECT
+	concat_ws(',', y, q) AS time,
+	money
+FROM
+	(
+		SELECT
+			YEAR (create_time) AS y,
+			QUARTER (create_time) AS q,
+			sum(money) AS money
+		FROM
+			income
+		GROUP BY
+			YEAR (create_time),
+			QUARTER (create_time)
+	) a
+     
+	</select>
+	<delete id="deletebyId">
+		delete from income  where id = #{id}
+	</delete>
+</mapper>

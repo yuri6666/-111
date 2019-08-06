@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.winit.mapper.ClassifyMapper">
+	<parameterMap id="Classify" type="com.winit.entity.pojo.Classify"></parameterMap>
+
+	<resultMap id="ClassifyResult" type="com.winit.entity.pojo.Classify">
+		<id property="id" column="id"/>
+		<result property="name" column="name"/>	
+		<result property="createTime" column="create_time"/>	
+	</resultMap>
+	
+	<select id="classifyList" resultMap="ClassifyResult">
+		select  * from classes a
+		<where>
+			<if test="id != null ">
+			      a.id=#{id}
+			</if>			
+			  <if test='name!=null and name!=""'>
+		    and a.name=#{name}
+		    </if>
+		</where>
+	</select>
+
+	<select id="getAll" resultMap="ClassifyResult">
+		select  * from classes a
+		<where>
+			<if test="id != null ">
+			      a.id=#{id}
+			</if>			
+			  <if test='name!=null and name!=""'>
+		    and a.name=#{name}
+		    </if>
+		</where>
+	</select>
+	<delete id="deletebyId">
+		delete from classes  where id = #{id}
+	</delete>
+</mapper>

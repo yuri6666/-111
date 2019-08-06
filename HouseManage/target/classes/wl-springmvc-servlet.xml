@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<beans xmlns="http://www.springframework.org/schema/beans"  
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+        xmlns:aop="http://www.springframework.org/schema/aop" 
+        xmlns:context="http://www.springframework.org/schema/context"  
+        xmlns:mvc="http://www.springframework.org/schema/mvc"  
+        xmlns:util="http://www.springframework.org/schema/util"   
+        xsi:schemaLocation="  
+          http://www.springframework.org/schema/beans  
+          http://www.springframework.org/schema/beans/spring-beans.xsd  
+          http://www.springframework.org/schema/context  
+          http://www.springframework.org/schema/context/spring-context-3.2.xsd  
+          http://www.springframework.org/schema/mvc      
+          http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
+		  http://www.springframework.org/schema/aop 
+		  http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
+          http://www.springframework.org/schema/util   
+          http://www.springframework.org/schema/util/spring-util-3.2.xsd" default-autowire="byName">   
+     
+		<!-- 同时开启json格式的支持 -->
+<!-- 	<mvc:annota0tion-driven></mvc:annotation-driven> -->
+	<!-- 只扫描所有的controller -->
+	<context:component-scan base-package="com.*">
+		<context:include-filter type="annotation"
+			expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+	
+
+	<context:property-placeholder location="classpath*:wl-config.properties" />
+    
+    
+	
+	<!-- 解决spring3.2 @ResponseBody注解直接返回对象并转换成JSON时出现406问题，同时解决了返回String类型乱码的问题 -->
+	<mvc:annotation-driven >
+		<mvc:message-converters>
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                <property name="supportedMediaTypes">
+                    <list>
+                        <value>text/plain;charset=UTF-8</value>
+                        <value>text/html;charset=UTF-8</value>
+                    </list>
+                </property>
+            </bean>
+            <bean
+                class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+                <property name="supportedMediaTypes">
+                    <list>
+                        <value>application/json; charset=UTF-8</value>
+                        <value>application/x-www-form-urlencoded; charset=UTF-8</value>
+                    </list>
+                </property>
+                <!-- 处理responseBody 里面日期类型 -->
+				<property name="objectMapper">
+					<bean class="com.fasterxml.jackson.databind.ObjectMapper">
+						<property name="dateFormat">
+							<bean class="java.text.SimpleDateFormat">
+								<constructor-arg type="java.lang.String" value="yyyy-MM-dd HH:mm:ss" />
+							</bean> 
+						</property> 
+						<!-- 时区指定 -->
+						<property name="timeZone" value="GMT+8" />
+						<!-- 为null字段时不显示 -->
+						<property name="serializationInclusion">
+							<value type="com.fasterxml.jackson.annotation.JsonInclude.Include">NON_NULL</value>
+						</property> 
+					</bean> 
+				</property> 
+            </bean>
+        </mvc:message-converters>
+        <mvc:async-support default-timeout="20000"/>
+	</mvc:annotation-driven>
+
+	<!-- 静态资源问题 -->
+	<mvc:default-servlet-handler />
+	
+		<!--配置需要登录的权限 -->
+	<mvc:interceptors>  
+   		 <mvc:interceptor>   
+	        <mvc:mapping path="/web/manage/**"/>
+	    
+			<bean class="com.winit.common.interceptor.LoginInterceptor">
+			</bean>
+   		 </mvc:interceptor> 
+   		 
+	</mvc:interceptors> 
+
+	
+	 <!-- 未认证或未授权时跳转必须在springmvc里面配，spring-shiro里的shirofilter配不生效 -->
+    <bean   class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+        <property name="exceptionMappings">
+            <props>
+                <!--表示捕获的异常 -->
+                <prop key="org.apache.shiro.authz.UnauthorizedException">
+                    <!--捕获该异常时跳转的路径 -->
+                    /403
+                </prop>
+                <!--表示捕获的异常 -->
+                <prop key="org.apache.shiro.authz.UnauthenticatedException">
+                    <!--捕获该异常时跳转的路径 -->
+                    /403
+                </prop>
+            </props>
+        </property>
+    </bean>
+	
+	<bean id="jsonHttpMessageConverter" class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">    
+      <property name="supportedMediaTypes">    
+        <list>    
+            <value>text/html;charset=UTF-8</value>    
+        </list>    
+       </property>    
+     </bean>
+     
+     <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">  
+       <property name="messageConverters">  
+         <list>  
+          <ref bean="jsonHttpMessageConverter"/>
+       </list>  
+       </property>  
+     </bean>
+     
+     
+     <bean id="viewResolver" class="com.winit.common.baseclass.JeeDevViewResolver">
+        <property name="defaultViewResolver" ref="jspViewResolver"/>
+
+    </bean>
+
+    
+    <bean id="beanNameViewResolver" class="org.springframework.web.servlet.view.BeanNameViewResolver"/>
+    
+    <bean id="jspViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+
+		<property name="prefix" value="/WEB-INF/page/"></property>
+		<property name="suffix" value=".jsp"></property>
+    </bean>
+    
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">  
+    <property name="defaultEncoding" value="utf-8"></property>  
+    <property name="maxUploadSize" value="10485760000"></property><!-- 最大上传文件大小  以字节为单位-->  
+    <property name="maxInMemorySize" value="10240"></property>  <!--写入内存的最大值,写不下了就生成临时文件 以字节为单位 -->
+</bean>  
+
+     
+     <!-- 开启aop注解扫描，针对controller -->
+	<aop:aspectj-autoproxy proxy-target-class="true"/>
+	
+	
+    
+</beans>

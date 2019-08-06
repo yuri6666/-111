@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.winit.mapper.UserMapper">
+	<parameterMap id="user" type="com.winit.entity.pojo.User"></parameterMap>
+
+	<resultMap id="userResult" type="com.winit.entity.pojo.User">
+		<id column="id" property="id"/>
+		<result column="username" property="username"/>
+		<result column="password" property="password"/>
+		<result column="type" property="type"/>
+		<result column="realname" property="realname"/>
+		<result column="create_time" property="createTime"/>
+		<result column="is_enable" property="isEnable"/>
+		<result column="class_id" property="classId"/>
+		<result column="level_id" property="levelId"/>
+		<result column="province_code" property="provinceCode"/>
+		<result column="city_code" property="cityCode"/>
+		<result column="county_code" property="countyCode"/>
+		<result column="price_id" property="priceId"/>
+		<result column="education_id" property="educationId"/>
+		<result column="experice_id" property="expericeId"/>
+		<result column="ability_id" property="abilityId"/>
+		<result column="age_id" property="ageId"/>
+		<result column="photo_url" property="photoUrl"/>
+		<result column="phone_number" property="phoneNumber"/>
+		<result column="card_number" property="cardNumber"/>
+		<result column="photo_url" property="photoUrl"/>
+	</resultMap>
+	
+	<select id="userList" resultMap="userResult">
+       select * from users a
+		<where>
+		   <if test="username != null and username != ''">
+		   		a.username LIKE CONCAT('%', #{username}, '%')
+		   </if>
+		   <if test="type != null">
+		        AND a.type = #{type}
+		   </if>
+		   <if test="realname != null and realname != ''">
+		   		AND a.realname LIKE CONCAT('%', #{realname}, '%')
+		   </if>
+
+		   <if test="id != null">
+		   		and a.id=#{id}
+		   </if>
+		   <if test="classId != null">
+		   		and a.class_id=#{classId}
+		   </if>
+		   <if test="levelId != null">
+		   		and a.level_id=#{levelId}
+		   </if>
+		   and  type !='0' 
+		</where>
+		
+		ORDER BY a.create_time desc
+	</select>
+
+	<select id="getAllUser" resultMap="userResult">
+      select * from users a
+		<where>
+		   <if test="username != null and username != ''">
+		   		a.username = #{username}
+		   </if>
+		    <if test="id != null">
+		   		and a.id=#{id}
+		   </if>
+		   <if test="type != null">
+		        AND a.type = #{type}
+		   </if>
+		   <if test="realname != null and realname != ''">
+		   		AND a.realname LIKE CONCAT('%', #{realname}, '%')
+		   </if>
+		     <if test="email != null and email != ''">
+		   		AND a.email=#{email}
+		   </if>
+		</where>
+		ORDER BY a.id ASC
+	</select>
+	<select id="getUserById" resultMap="userResult">
+	
+	select * from users where id=#{userId}
+	
+	</select>
+	<select id="checkRepeat" resultMap="userResult">
+		select * from users where username = #{username} 
+	</select>
+	
+	<select id="getByUsername" resultMap="userResult">
+		select * from users where username = #{username} 
+	</select>
+	<select id="getByUserEmail" resultMap="userResult">
+		select * from users where email = #{email} 
+	</select>
+	<update id="updatePwd">
+		update users set password = #{password} where id = #{id}
+	</update>
+	
+	<update id="updateselective">
+		update users 
+		<set>
+	<if test='isEnable!=null and isEnable!=""'>
+		is_enable= #{isEnable},
+		</if>
+		</set>
+		 where id = #{id}
+	</update>
+</mapper>
